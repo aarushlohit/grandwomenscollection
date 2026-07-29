@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST='{"pages":{},"app":{"/home/aarush/Myoffice/Personal Projects/grandwomenscollection/grandswomencollections/src/app/layout":["static/media/13971731025ec697-s.p.woff2","static/media/7b89a4fd5e90ede0-s.p.woff2"]},"appUsingSizeAdjust":true,"pagesUsingSizeAdjust":false}';
