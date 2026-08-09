@@ -3,172 +3,147 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, CreditCard, Truck, MapPin, PartyPopper, ArrowRight, ArrowLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Check, CreditCard, MapPin, PartyPopper, Truck } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { useCartStore } from "@/store/use-cart-store";
 import { products } from "@/lib/data/catalog";
 import { formatCurrency } from "@/lib/utils";
+import { backend } from "@/lib/firebase/backend";
+
+interface RazorpaySuccess {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayCheckout {
+  open: () => void;
+  on: (event: "payment.failed", callback: (response: { error?: { description?: string } }) => void) => void;
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => RazorpayCheckout;
+  }
+}
 
 const steps = [
   { id: "shipping", label: "Shipping", icon: Truck },
   { id: "address", label: "Address", icon: MapPin },
   { id: "payment", label: "Payment", icon: CreditCard },
-  { id: "success", label: "Confirmation", icon: PartyPopper }
+  { id: "success", label: "Confirmation", icon: PartyPopper },
 ];
+
+const initialAddress = { name: "", phone: "", line1: "", line2: "", city: "", state: "", postalCode: "", country: "IN" as const };
+
+function loadRazorpay(): Promise<void> {
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("Razorpay checkout failed to load.")), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Razorpay checkout failed to load."));
+    document.head.appendChild(script);
+  });
+}
 
 export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const { items } = useCartStore();
-  const cartItems = items.map((item) => ({
-    ...item,
-    product: products.find((p) => p.id === item.productId)
-  })).filter((item) => item.product);
-
+  const [address, setAddress] = useState(initialAddress);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [confirmedOrderId, setConfirmedOrderId] = useState("");
+  const [checkoutRequestId] = useState(() => crypto.randomUUID());
+  const { items, clearCart } = useCartStore();
+  const cartItems = items.map((item) => ({ ...item, product: products.find((product) => product.id === item.productId) })).filter((item) => item.product);
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product?.price ?? 0) * item.quantity, 0);
+  const addressIsValid = address.name.trim().length >= 1 && /^\+?[0-9]{10,15}$/.test(address.phone.trim()) && address.line1.trim().length >= 3 && address.city.trim().length >= 2 && address.state.trim().length >= 2 && /^[1-9][0-9]{5}$/.test(address.postalCode.trim());
 
-  const nextStep = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 0));
+  async function beginSecurePayment() {
+    if (!cartItems.length) return setCheckoutError("Your bag is empty.");
+    if (!addressIsValid) {
+      setCurrentStep(1);
+      return setCheckoutError("Complete the delivery address before payment.");
+    }
+    setIsProcessing(true);
+    setCheckoutError("");
+    try {
+      await loadRazorpay();
+      const result = await backend.createCheckoutOrder({
+        requestId: checkoutRequestId,
+        items: items.map((item) => ({ productId: item.productId, quantity: item.quantity, size: item.size, color: item.color })),
+        shippingAddress: Object.fromEntries(Object.entries(address).map(([key, value]) => [key, value.trim()])),
+      });
+      const order = result.data as { internalOrderId: string; razorpayOrderId: string; razorpayKeyId: string; amountPaise: number; currency: string };
+      if (!window.Razorpay) throw new Error("Razorpay checkout is unavailable.");
+      const checkout = new window.Razorpay({
+        key: order.razorpayKeyId,
+        amount: order.amountPaise,
+        currency: order.currency,
+        name: "Grand Women's Collections",
+        description: "Secure boutique checkout",
+        order_id: order.razorpayOrderId,
+        prefill: { name: address.name, contact: address.phone },
+        theme: { color: "#241B16" },
+        modal: { ondismiss: () => setIsProcessing(false) },
+        handler: async (payment: RazorpaySuccess) => {
+          try {
+            await backend.verifyPayment({ internalOrderId: order.internalOrderId, razorpayOrderId: payment.razorpay_order_id, razorpayPaymentId: payment.razorpay_payment_id, signature: payment.razorpay_signature });
+            setConfirmedOrderId(order.internalOrderId);
+            clearCart();
+            setCurrentStep(3);
+          } catch {
+            setCheckoutError("Payment was received but verification is pending. Do not retry; contact support with your payment ID.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+      });
+      checkout.on("payment.failed", async (failure) => {
+        setIsProcessing(false);
+        setCheckoutError(failure.error?.description ?? "Payment was not completed. No verified order was created.");
+        try {
+          await backend.recordClientSecurityEvent({ type: "payment-client-error", route: "/checkout", details: "Razorpay reported a client payment failure." });
+        } catch {
+          // The visible payment failure remains authoritative when telemetry is unavailable.
+        }
+      });
+      checkout.open();
+    } catch (error) {
+      const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+      setCheckoutError(code.includes("unauthenticated") ? "Sign in before continuing to secure payment." : "Secure checkout is temporarily unavailable. Please try again.");
+      setIsProcessing(false);
+    }
+  }
 
-  return (
-    <>
-      <SiteHeader />
-      <main className="min-h-screen bg-[#f7f4ed] pt-28 text-[#171310] dark:bg-[#171310] dark:text-[#f7f4ed]">
-        <section className="mx-auto max-w-[1320px] px-5 pb-[clamp(6rem,10vw,10rem)] pt-8 md:px-8">
-          <div className="max-w-3xl">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#b98a3d]">Private checkout</span>
-            <h1 className="mt-4 font-serif text-[clamp(4rem,8vw,8rem)] font-light leading-[0.84] tracking-[-0.045em]">Make it yours.</h1>
-          </div>
+  return <><SiteHeader /><main className="min-h-screen bg-[#f7f4ed] pt-28 text-[#171310] dark:bg-[#171310] dark:text-[#f7f4ed]"><section className="mx-auto max-w-[1320px] px-5 pb-[clamp(6rem,10vw,10rem)] pt-8 md:px-8">
+    <div className="max-w-3xl"><span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#b98a3d]">Private checkout</span><h1 className="mt-4 font-serif text-[clamp(4rem,8vw,8rem)] font-light leading-[0.84] tracking-[-0.045em]">Make it yours.</h1></div>
+    <div className="mt-10 flex items-center gap-1 overflow-x-auto border-y border-[#281e16]/12 py-4 dark:border-white/12">{steps.map((step, index) => <div key={step.id} className="flex items-center"><div className={`flex min-h-10 items-center gap-2 rounded-full px-4 text-[9px] font-semibold uppercase tracking-[0.12em] ${index <= currentStep ? "bg-[#241b16] text-[#f7f4ed] dark:bg-[#f7f4ed] dark:text-[#171310]" : "text-[#716b63]"}`}>{index < currentStep ? <Check className="h-3.5 w-3.5" /> : <step.icon className="h-3.5 w-3.5" />}<span className="hidden sm:block">{step.label}</span></div>{index < steps.length - 1 && <div className={`mx-2 h-px w-8 ${index < currentStep ? "bg-[#b98a3d]" : "bg-black/10 dark:bg-white/10"}`} />}</div>)}</div>
+    <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_380px]"><div className="border-t border-[#281e16]/12 pt-8 dark:border-white/12 md:pt-10"><AnimatePresence mode="wait">
+      {currentStep === 0 && <Step key="shipping"><h2 className="font-serif text-4xl font-light">Shipping method</h2><div className="mt-6 flex items-center justify-between rounded-xl border border-[#b98a3d] bg-[#b98a3d]/5 p-5"><div className="flex items-center gap-3.5"><div className="h-4 w-4 rounded-full border-[5px] border-[#b98a3d]" /><div><p className="text-sm font-semibold">Insured Standard Delivery</p><p className="text-xs text-[#716b63]">5–7 business days</p></div></div><span className="text-xs font-semibold text-[#b98a3d]">Complimentary</span></div></Step>}
+      {currentStep === 1 && <Step key="address"><h2 className="font-serif text-4xl font-light">Delivery address</h2><div className="mt-6 grid gap-4 sm:grid-cols-2">{([ ["name", "Full Name"], ["phone", "Phone Number"], ["line1", "Address Line 1"], ["line2", "Address Line 2"], ["city", "City"], ["state", "State"], ["postalCode", "Pincode"] ] as const).map(([key, label]) => <div key={key} className={key === "line1" || key === "line2" ? "sm:col-span-2" : ""}><label htmlFor={`checkout-${key}`} className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.18em] text-[#716b63]">{label}</label><input id={`checkout-${key}`} required value={address[key]} onChange={(event) => setAddress((current) => ({ ...current, [key]: event.target.value }))} autoComplete={key === "name" ? "name" : key === "phone" ? "tel" : key === "postalCode" ? "postal-code" : key === "line1" ? "address-line1" : key === "line2" ? "address-line2" : key === "city" ? "address-level2" : "address-level1"} inputMode={key === "phone" || key === "postalCode" ? "numeric" : undefined} className="w-full rounded-lg border border-[#281e16]/14 bg-transparent px-4 py-3.5 text-base outline-none focus:border-[#b98a3d] dark:border-white/15" /></div>)}</div></Step>}
+      {currentStep === 2 && <Step key="payment"><h2 className="font-serif text-4xl font-light">Secure payment</h2><p className="mt-3 max-w-xl text-sm leading-6 text-[#716b63]">Your total is calculated again by our Firebase backend. Card, UPI, NetBanking and wallet details are entered only inside Razorpay&apos;s secure checkout—we never collect or store them.</p><div className="mt-7 border-y border-[#281e16]/12 py-5 text-[10px] uppercase tracking-[0.16em] text-[#716b63] dark:border-white/12">Server-priced · Inventory reserved · Signature verified</div></Step>}
+      {currentStep === 3 && <motion.div key="success" initial={{ opacity: 0, transform: "scale(.97)" }} animate={{ opacity: 1, transform: "scale(1)" }} className="py-10 text-center"><div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-700/10 text-emerald-700"><PartyPopper className="h-10 w-10" /></div><h2 className="mt-6 font-serif text-4xl">Order confirmed.</h2><p className="mt-3 text-sm text-[#716b63]">Payment was verified for order <span className="font-semibold text-[#171310] dark:text-[#f7f4ed]">{confirmedOrderId}</span>.</p><Link href="/orders" className="mt-8 inline-flex min-h-12 items-center rounded-full bg-[#241b16] px-8 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f7f4ed]">View order</Link></motion.div>}
+    </AnimatePresence>
+    {checkoutError && <div role="alert" className="mt-7 border-y border-red-900/15 bg-red-900/5 px-4 py-4 text-sm text-red-900 dark:text-red-200">{checkoutError}{checkoutError.startsWith("Sign in") && <Link href="/login" className="ml-2 font-semibold underline underline-offset-4">Login</Link>}</div>}
+    {currentStep < 3 && <div className="mt-10 flex items-center justify-between border-t border-black/5 pt-6 dark:border-white/10">{currentStep > 0 ? <button onClick={() => { setCheckoutError(""); setCurrentStep((step) => step - 1); }} className="flex min-h-11 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#716b63]"><ArrowLeft className="h-4 w-4" /> Previous</button> : <div />}<button disabled={isProcessing || (currentStep === 1 && !addressIsValid)} onClick={currentStep === 2 ? beginSecurePayment : () => { setCheckoutError(""); setCurrentStep((step) => Math.min(step + 1, 2)); }} className="flex min-h-14 items-center gap-3 rounded-full bg-[#241b16] px-8 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f7f4ed] hover:bg-[#b98a3d] disabled:cursor-not-allowed disabled:opacity-45 dark:bg-[#f7f4ed] dark:text-[#171310]">{isProcessing ? "Opening secure payment…" : currentStep === 2 ? "Pay securely" : "Continue"}<ArrowRight className="h-4 w-4" /></button></div>}
+    </div><OrderSummary cartItems={cartItems} subtotal={subtotal} /></div>
+  </section></main><SiteFooter /></>;
+}
 
-          <div className="mt-10 flex items-center gap-1 overflow-x-auto border-y border-[#281e16]/12 py-4 dark:border-white/12">
-            {steps.map((step, i) => (
-              <div key={step.id} className="flex items-center">
-                <div className={`flex min-h-10 items-center gap-2 rounded-full px-4 text-[9px] font-semibold uppercase tracking-[0.12em] transition-colors ${
-                  i <= currentStep ? "bg-[#241b16] text-[#f7f4ed] dark:bg-[#f7f4ed] dark:text-[#171310]" : "text-[#716b63]"
-                }`}>
-                  {i < currentStep ? <Check className="h-3.5 w-3.5" /> : <step.icon className="h-3.5 w-3.5" />}
-                  <span className="hidden sm:block">{step.label}</span>
-                </div>
-                {i < steps.length - 1 && <div className={`mx-2 h-0.5 w-8 rounded-full ${i < currentStep ? "bg-gold" : "bg-black/10 dark:bg-white/10"}`} />}
-              </div>
-            ))}
-          </div>
+function Step({ children }: { children: React.ReactNode }) {
+  return <motion.div initial={{ opacity: 0, transform: "translateX(16px)" }} animate={{ opacity: 1, transform: "translateX(0)" }} exit={{ opacity: 0, transform: "translateX(-12px)" }}>{children}</motion.div>;
+}
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_380px]">
-            <div className="border-t border-[#281e16]/12 pt-8 dark:border-white/12 md:pt-10">
-              <AnimatePresence mode="wait">
-                {currentStep === 0 && (
-                  <motion.div key="shipping" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h2 className="font-serif text-4xl font-light">Shipping method</h2>
-                    <div className="mt-6 space-y-3">
-                      {[
-                        { label: "Insured Standard Delivery", time: "5-7 business days", price: "Free above ₹15,000" },
-                        { label: "Priority Express Dispatch", time: "2-3 business days", price: "₹500" },
-                        { label: "VIP Atelier Same Day Delivery", time: "Next business day", price: "₹1,000" }
-                      ].map((option, i) => (
-                        <label key={option.label} className={`flex cursor-pointer items-center justify-between rounded-xl border p-5 transition-colors ${i === 0 ? "border-[#b98a3d] bg-[#b98a3d]/5" : "border-[#281e16]/12 dark:border-white/12"}`}>
-                          <div className="flex items-center gap-3.5">
-                            <div className={`h-4 w-4 rounded-full border-2 ${i === 0 ? "border-gold" : "border-ink/20 dark:border-cream/20"}`}>
-                              {i === 0 && <div className="mx-auto mt-0.5 h-2 w-2 rounded-full bg-gold" />}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold text-ink dark:text-cream">{option.label}</p>
-                              <p className="text-xs text-ink/50 dark:text-cream/50">{option.time}</p>
-                            </div>
-                          </div>
-                          <span className="text-xs font-bold text-gold">{option.price}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 1 && (
-                  <motion.div key="address" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h2 className="font-serif text-4xl font-light">Delivery address</h2>
-                    <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                      {["Full Name", "Phone Number", "Address Line 1", "Address Line 2", "City", "State", "Pincode", "Country"].map((field) => (
-                        <div key={field} className={field === "Address Line 1" || field === "Address Line 2" ? "sm:col-span-2" : ""}>
-                          <label className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.18em] text-[#716b63]">{field}</label>
-                          <input className="w-full rounded-lg border border-[#281e16]/14 bg-transparent px-4 py-3.5 text-base outline-none focus:border-[#b98a3d] dark:border-white/15" placeholder={field} />
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 2 && (
-                  <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <h2 className="font-serif text-4xl font-light">Secure payment</h2>
-                    <p className="mt-2 text-xs text-ink/60 dark:text-cream/60">Secure 256-bit encrypted checkout via Razorpay & NetBanking.</p>
-                    <div className="mt-6 grid gap-4">
-                      {["Card Number", "Expiry Date", "CVV", "Name on Card"].map((field) => (
-                        <div key={field}>
-                          <label className="mb-2 block text-[9px] font-semibold uppercase tracking-[0.18em] text-[#716b63]">{field}</label>
-                          <input className="w-full rounded-lg border border-[#281e16]/14 bg-transparent px-4 py-3.5 text-base outline-none focus:border-[#b98a3d] dark:border-white/15" placeholder={field} />
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 3 && (
-                  <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-10 text-center">
-                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
-                      <PartyPopper className="h-10 w-10" />
-                    </div>
-                    <h2 className="mt-6 font-serif text-4xl text-ink dark:text-cream">Order Confirmed!</h2>
-                    <p className="mt-3 text-sm text-ink/60 dark:text-cream/60">Thank you for choosing GRAND. Your order #GWC-{Math.floor(Math.random() * 90000 + 10000)} is being handcrafted.</p>
-                    <Link href="/shop" className="mt-8 inline-flex rounded-full bg-gold px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-xl hover:bg-gold-dark transition-all">
-                      Continue Shopping
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {currentStep < 3 && (
-                <div className="mt-10 flex justify-between items-center pt-6 border-t border-black/5 dark:border-white/10">
-                  {currentStep > 0 ? (
-                    <button onClick={prevStep} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink/60 hover:text-ink dark:text-cream/60 dark:hover:text-cream">
-                      <ArrowLeft className="h-4 w-4" /> Previous
-                    </button>
-                  ) : <div />}
-                  <button onClick={nextStep} className="flex min-h-14 items-center gap-3 rounded-full bg-[#241b16] px-8 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f7f4ed] transition-colors hover:bg-[#b98a3d] dark:bg-[#f7f4ed] dark:text-[#171310]">
-                    {currentStep === 2 ? "Place Order" : "Continue"} <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="lg:sticky lg:top-[100px] lg:self-start">
-              <div className="border-y border-[#281e16]/12 py-7 dark:border-white/12">
-                <h3 className="font-serif text-3xl font-light">Your selection</h3>
-                <div className="mt-6 space-y-4">
-                  {cartItems.map((item) => (
-                    <div key={item.productId} className="flex items-center gap-4">
-                      <div className="relative h-16 w-14 overflow-hidden rounded-xl">
-                        <Image src={item.product!.images[0].url} alt={item.product!.title} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-ink dark:text-cream">{item.product!.title}</p>
-                        <p className="text-xs text-ink/50 dark:text-cream/50">Qty: {item.quantity}</p>
-                      </div>
-                      <p className="text-sm font-bold text-gold">{formatCurrency(item.product!.price * item.quantity)}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="my-6 border-t border-black/5 dark:border-white/10" />
-                <div className="flex justify-between text-sm">
-                  <span className="text-ink/60 dark:text-cream/60">Subtotal</span>
-                  <span className="font-bold text-ink dark:text-cream">{formatCurrency(subtotal)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </>
-  );
+function OrderSummary({ cartItems, subtotal }: { cartItems: Array<{ productId: string; quantity: number; product: (typeof products)[number] | undefined }>; subtotal: number }) {
+  return <aside className="lg:sticky lg:top-[100px] lg:self-start"><div className="border-y border-[#281e16]/12 py-7 dark:border-white/12"><h3 className="font-serif text-3xl font-light">Your selection</h3><div className="mt-6 space-y-4">{cartItems.length ? cartItems.map((item) => <div key={item.productId} className="flex items-center gap-4"><div className="relative h-16 w-14 overflow-hidden rounded-xl"><Image src={item.product!.images[0].url} alt={item.product!.title} fill className="object-cover" /></div><div className="flex-1"><p className="text-sm font-semibold">{item.product!.title}</p><p className="text-xs text-[#716b63]">Qty: {item.quantity}</p></div><p className="text-sm font-semibold text-[#b98a3d]">{formatCurrency(item.product!.price * item.quantity)}</p></div>) : <p className="text-sm text-[#716b63]">Your bag is empty.</p>}</div><div className="my-6 border-t border-black/5 dark:border-white/10" /><div className="flex justify-between text-sm"><span className="text-[#716b63]">Subtotal</span><span className="font-semibold">{formatCurrency(subtotal)}</span></div></div></aside>;
 }

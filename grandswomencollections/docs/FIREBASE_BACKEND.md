@@ -5,6 +5,7 @@
 The `backend` codebase provides:
 
 - Firebase Auth profile provisioning and custom-claim RBAC.
+- Customer email verification, hashed failed-login telemetry, and explicit throttling for privileged mutations.
 - Server-priced, idempotent Razorpay checkout creation.
 - Constant-time payment and webhook signature verification.
 - Transactional inventory deduction and coupon consumption.
@@ -16,6 +17,7 @@ The `backend` codebase provides:
 - Telegram and SMTP alerts.
 - Scheduled Firestore export initiation and backup status.
 - Signed deployment notifications.
+- A real checkout client that creates an idempotent server-priced order, opens Razorpay Checkout, verifies the returned HMAC server-side, and clears the bag only after verification.
 
 ## Collections
 
@@ -26,6 +28,8 @@ Prices are integers in paise (`pricePaise`). The server never accepts a customer
 ## Safe staging setup
 
 Do not use the globally selected Firebase alias. Pass `--project` on every command.
+
+Before deploying, confirm that `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, the explicit CLI `--project`, the service-account project, and the intended boutique environment are the same project. Abort on any mismatch.
 
 ```bash
 firebase login

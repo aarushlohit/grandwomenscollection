@@ -5,6 +5,7 @@ import { auth, db, FieldValue, REGION, Timestamp } from "./core";
 import { razorpayKeyId, razorpaySecret } from "./params";
 import { createRazorpayRefund } from "./payments";
 import { catalogMutationSchema, orderStatusSchema, roleSchema } from "./schemas";
+import { enforceRateLimit } from "./security";
 
 const COLLECTION_BY_ENTITY = {
   product: "products",
@@ -18,6 +19,7 @@ export const adminMutateCatalog = onCall(
   async (request) => {
     const actorRole = requireAdmin(request);
     const actorId = request.auth!.uid;
+    await enforceRateLimit({ scope: "admin-catalog", subject: actorId, limit: 60, windowMs: 15 * 60_000 });
     const input = catalogMutationSchema.parse(request.data);
     const collection = COLLECTION_BY_ENTITY[input.entity];
     const documentId = input.action === "upsert" ? input.value.id : input.id;
@@ -56,6 +58,7 @@ export const adminUpdateOrderStatus = onCall(
   async (request) => {
     const actorRole = requireOperationsAccess(request);
     const actorId = request.auth!.uid;
+    await enforceRateLimit({ scope: "admin-order-status", subject: actorId, limit: 60, windowMs: 15 * 60_000 });
     const input = orderStatusSchema.parse(request.data);
     const reference = db.collection("orders").doc(input.orderId);
     const snapshot = await reference.get();
@@ -82,6 +85,7 @@ export const adminRefundOrder = onCall(
   async (request) => {
     const actorRole = requireAdmin(request);
     const actorId = request.auth!.uid;
+    await enforceRateLimit({ scope: "admin-refund", subject: actorId, limit: 10, windowMs: 60 * 60_000 });
     const orderId = typeof request.data?.orderId === "string" ? request.data.orderId : "";
     if (!/^[a-zA-Z0-9_-]{2,128}$/.test(orderId)) throw new HttpsError("invalid-argument", "Invalid order ID.");
     const reference = db.collection("orders").doc(orderId);
@@ -115,6 +119,7 @@ export const adminSetUserRole = onCall(
   async (request) => {
     const actorRole = requireSuperAdmin(request);
     const actorId = request.auth!.uid;
+    await enforceRateLimit({ scope: "admin-role", subject: actorId, limit: 10, windowMs: 60 * 60_000 });
     const input = roleSchema.parse(request.data);
     if (input.uid === actorId && input.role !== "super_admin") throw new HttpsError("failed-precondition", "You cannot remove your own super-admin role.");
 

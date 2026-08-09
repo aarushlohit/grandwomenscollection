@@ -58,7 +58,11 @@ export function SiteHeader() {
             <NavIcon label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} icon={resolvedTheme === "dark" ? <Sun /> : <Moon />} hideMobile />
             <button onClick={() => setSearchOpen(true)} aria-label="Search" className="flex h-11 w-10 items-center justify-center opacity-75 transition-opacity hover:opacity-100"><Search className="h-[17px] w-[17px]" strokeWidth={1.55} /></button>
             <CountLink href="/wishlist" label="Wishlist" count={wishlistCount}><Heart /></CountLink>
-            <Link href="/profile" aria-label="Account" className="hidden h-11 w-10 items-center justify-center opacity-75 transition-opacity hover:opacity-100 sm:flex"><UserRound className="h-[17px] w-[17px]" strokeWidth={1.55} /></Link>
+            <div className="hidden items-center gap-1 border-l border-current/10 pl-2 xl:flex">
+              <Link href="/login" className="flex min-h-10 items-center px-3 text-[9px] font-semibold uppercase tracking-[0.16em] opacity-70 transition-opacity hover:opacity-100">Login</Link>
+              <Link href="/register" className={`flex min-h-10 items-center rounded-full px-4 text-[9px] font-semibold uppercase tracking-[0.16em] transition-transform hover:scale-[1.02] active:scale-[0.98] ${onHero ? "bg-white text-[#171310]" : "bg-[#241b16] text-[#f7f4ed] dark:bg-[#f7f4ed] dark:text-[#171310]"}`}>Sign up</Link>
+            </div>
+            <Link href="/profile" aria-label="Account" className="hidden h-11 w-10 items-center justify-center opacity-75 transition-opacity hover:opacity-100 sm:flex xl:hidden"><UserRound className="h-[17px] w-[17px]" strokeWidth={1.55} /></Link>
             <CountLink href="/cart" label="Shopping bag" count={cartCount}><ShoppingBag /></CountLink>
             <button onClick={() => setMobileOpen(true)} aria-label="Open menu" className="flex h-11 w-10 items-center justify-center lg:hidden"><Menu className="h-[19px] w-[19px]" strokeWidth={1.55} /></button>
           </div>
@@ -75,7 +79,8 @@ export function SiteHeader() {
             <nav className="flex flex-1 flex-col justify-center" aria-label="Mobile navigation">
               {navLinks.map((link, index) => <motion.div key={link.href} initial={{ opacity: 0, transform: "translateY(18px)" }} animate={{ opacity: 1, transform: "translateY(0)" }} transition={{ duration: 0.55, delay: index * 0.045, ease: [0.16, 1, 0.3, 1] }}><Link href={link.href} className="group flex min-h-16 items-baseline justify-between border-b border-current/10 py-3 font-serif text-[clamp(2.7rem,13vw,4.5rem)] font-light leading-none tracking-[-0.035em]"><span>{link.label}</span><span className="font-sans text-[9px] uppercase tracking-[0.2em] opacity-35">0{index + 1}</span></Link></motion.div>)}
             </nav>
-            <div className="flex items-center justify-between border-t border-current/10 pt-4 text-[10px] uppercase tracking-[0.18em] opacity-55"><span>Coimbatore · India</span><button onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="flex min-h-11 items-center gap-2">{resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} Theme</button></div>
+            <div className="grid grid-cols-2 gap-2 border-t border-current/10 pt-4"><Link href="/login" className="flex min-h-12 items-center justify-center rounded-full border border-current/15 text-[10px] font-semibold uppercase tracking-[0.16em]">Login</Link><Link href="/register" className="flex min-h-12 items-center justify-center rounded-full bg-[#241b16] text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f7f4ed] dark:bg-[#f7f4ed] dark:text-[#171310]">Sign up</Link></div>
+            <div className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-[0.18em] opacity-55"><span>Coimbatore · India</span><button onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="flex min-h-11 items-center gap-2">{resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} Theme</button></div>
           </div>
         </motion.div>}
       </AnimatePresence>

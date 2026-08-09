@@ -60,7 +60,7 @@ export const recordClientSecurityEvent = onCall(
       const since = Timestamp.fromMillis(Date.now() - 15 * 60_000);
       const burst = await db.collection("securityEvents").where("type", "==", "failed-login").where("sourceIp", "==", sourceIp).where("createdAt", ">=", since).limit(6).get();
       if (burst.size >= 5) {
-        await emitAlert({ type: "failed-login-burst", severity: "critical", title: "Failed admin login burst", message: `At least ${burst.size} failed login events were observed from ${sourceIp}.`, telegram: true, email: true });
+        await emitAlert({ type: "failed-login-burst", severity: "critical", title: "Failed login burst", message: `At least ${burst.size} failed login events were observed from ${sourceIp}.`, telegram: true, email: true });
       }
     }
     return { recorded: true };
@@ -128,6 +128,7 @@ export const getSocDashboard = onCall(
   { region: REGION, enforceAppCheck: true },
   async (request) => {
     requireOperationsAccess(request);
+    await enforceRateLimit({ scope: "soc-dashboard", subject: request.auth!.uid, limit: 120, windowMs: 60 * 60_000 });
     const since = Timestamp.fromMillis(Date.now() - ONE_DAY_MS);
     const [events, alerts, payments, healthDocument, backupDocument, usageDocument] = await Promise.all([
       db.collection("securityEvents").where("createdAt", ">=", since).orderBy("createdAt", "desc").limit(100).get(),
@@ -169,6 +170,7 @@ export const getOperationsDashboard = onCall(
   { region: REGION, enforceAppCheck: true },
   async (request) => {
     requireOperationsAccess(request);
+    await enforceRateLimit({ scope: "operations-dashboard", subject: request.auth!.uid, limit: 120, windowMs: 60 * 60_000 });
     const [products, orders, customers, metrics] = await Promise.all([
       db.collection("products").count().get(),
       db.collection("orders").count().get(),
