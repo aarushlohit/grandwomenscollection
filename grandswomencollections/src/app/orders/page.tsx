@@ -1,18 +1,3 @@
-import { SiteFooter } from "@/components/site/footer";
-import { SiteHeader } from "@/components/site/header";
-import { Card } from "@/components/ui/card";
-
-export default function OrdersPage() {
-  return (
-    <>
-      <SiteHeader />
-      <main className="container py-16">
-        <h1 className="font-serif text-5xl text-ink dark:text-cream">Orders</h1>
-        <Card className="mt-8 p-8 text-sm text-ink/65 dark:text-cream/65">
-          Timeline tracking, invoice access, support escalation, and return initiation fit into this order history surface.
-        </Card>
-      </main>
-      <SiteFooter />
-    </>
-  );
-}
+import Link from "next/link";
+import { AccountEmptyState, AccountShell } from "@/components/site/account-shell";
+export default function OrdersPage() { return <AccountShell eyebrow="Purchases & delivery" title="Your orders" active="/orders"><AccountEmptyState icon="order" title="No orders yet." description="Once you place an order, its payment confirmation, insured dispatch, delivery timeline, invoice and return options will be available here." /><Link href="/shop" className="mt-8 inline-flex min-h-12 items-center rounded-md bg-ink px-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-cream hover:bg-gold-dark">Explore the collection</Link></AccountShell>; }

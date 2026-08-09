@@ -5,20 +5,70 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function hasRole(roles) {
+      return signedIn() && request.auth.token.role is string && request.auth.token.role in roles;
+    }
+
     function isAdmin() {
-      return signedIn() && request.auth.token.role in ['admin', 'soc_admin'];
+      return hasRole(['admin', 'super_admin']);
     }
 
-    match /products/{allPaths=**},
-          /banners/{allPaths=**},
-          /categories/{allPaths=**} {
-      allow read: if true;
-      allow write: if isAdmin();
+    function owns(userId) {
+      return signedIn() && request.auth.uid == userId;
     }
 
-    match /profiles/{userId}/{allPaths=**} {
-      allow read: if signedIn();
-      allow write: if signedIn() && request.auth.uid == userId;
+    function isSafeImage(maxBytes) {
+      return request.resource.size > 0
+        && request.resource.size <= maxBytes
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    function hasNoValidationClaim() {
+      return !request.resource.metadata.keys().hasAny(['validated']);
+    }
+
+    function isValidatedImage() {
+      return resource.metadata.keys().hasAny(['validated'])
+        && resource.metadata.validated == 'true';
+    }
+
+    match /products/{fileName} {
+      allow read: if isValidatedImage();
+      allow create: if isAdmin() && isSafeImage(10 * 1024 * 1024) && hasNoValidationClaim();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /banners/{fileName} {
+      allow read: if isValidatedImage();
+      allow create: if isAdmin() && isSafeImage(10 * 1024 * 1024) && hasNoValidationClaim();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /categories/{fileName} {
+      allow read: if isValidatedImage();
+      allow create: if isAdmin() && isSafeImage(10 * 1024 * 1024) && hasNoValidationClaim();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /profiles/{userId}/{fileName} {
+      allow read: if owns(userId) && isValidatedImage();
+      allow create: if owns(userId) && isSafeImage(5 * 1024 * 1024) && hasNoValidationClaim();
+      allow update: if false;
+      allow delete: if owns(userId);
+    }
+
+    match /visual-search/{userId}/{fileName} {
+      allow read: if false;
+      allow create: if owns(userId) && isSafeImage(5 * 1024 * 1024) && hasNoValidationClaim();
+      allow update: if false;
+      allow delete: if owns(userId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

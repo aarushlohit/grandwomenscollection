@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Trash2, ArrowRight, Tag, Truck, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, Trash2 } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { useCartStore } from "@/store/use-cart-store";
@@ -14,128 +13,16 @@ import { formatCurrency } from "@/lib/utils";
 export default function CartPage() {
   const { items, removeItem } = useCartStore();
   const [coupon, setCoupon] = useState("");
-
-  const cartItems = items.map((item) => {
-    const product = products.find((p) => p.id === item.productId);
-    return { ...item, product };
-  }).filter((item) => item.product);
-
+  const cartItems = items.map((item) => ({ ...item, product: products.find((product) => product.id === item.productId) })).filter((item) => item.product);
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product?.price ?? 0) * item.quantity, 0);
   const shipping = subtotal >= 15000 ? 0 : 500;
   const total = subtotal + shipping;
 
-  return (
-    <>
-      <SiteHeader />
-      <main className="pt-[72px] bg-cream dark:bg-black min-h-screen transition-colors">
-        <section className="container py-12 md:py-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">Shopping Experience</span>
-              <h1 className="font-serif text-4xl md:text-6xl text-ink dark:text-cream mt-1">Your Shopping Bag</h1>
-            </div>
-          </div>
-
-          {cartItems.length === 0 ? (
-            <div className="glass-card rounded-[2.5rem] p-16 text-center max-w-xl mx-auto my-12 border border-black/5 dark:border-white/10">
-              <p className="font-serif text-3xl text-ink dark:text-cream">Your bag is currently empty</p>
-              <p className="mt-3 text-sm text-ink/60 dark:text-cream/60 font-light">Explore our silk sarees, lehengas, and temple jewelry.</p>
-              <Link href="/shop" className="mt-8 inline-flex rounded-full bg-gold px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-xl hover:bg-gold-dark transition-all">
-                Explore Collections
-              </Link>
-            </div>
-          ) : (
-            <div className="grid gap-10 lg:grid-cols-[1fr_400px]">
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <motion.div
-                    key={item.productId}
-                    layout
-                    className="glass-card rounded-[2rem] p-6 flex gap-6 items-center border border-black/5 dark:border-white/10"
-                  >
-                    <div className="relative h-32 w-28 flex-shrink-0 overflow-hidden rounded-2xl">
-                      <Image src={item.product!.images[0].url} alt={item.product!.title} fill className="object-cover" />
-                    </div>
-                    <div className="flex flex-1 flex-col justify-between py-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">{item.product!.category}</p>
-                          <p className="mt-1 font-serif text-2xl text-ink dark:text-cream">{item.product!.title}</p>
-                        </div>
-                        <button 
-                          onClick={() => removeItem(item.productId)} 
-                          className="text-ink/30 dark:text-cream/30 hover:text-rose-500 transition-colors p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-ink/60 dark:text-cream/60 font-medium">
-                        <span>Size: {item.size}</span>
-                        <span>·</span>
-                        <span>Quantity: {item.quantity}</span>
-                      </div>
-                      <p className="mt-2 font-bold text-lg text-ink dark:text-cream">{formatCurrency(item.product!.price * item.quantity)}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="lg:sticky lg:top-[100px] lg:self-start">
-                <div className="glass-card rounded-[2.5rem] p-8 border border-black/5 dark:border-white/10 space-y-6">
-                  <h2 className="font-serif text-3xl text-ink dark:text-cream">Order Summary</h2>
-
-                  <div className="space-y-3.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-ink/70 dark:text-cream/70">Subtotal</span>
-                      <span className="font-semibold text-ink dark:text-cream">{formatCurrency(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink/70 dark:text-cream/70">Insured Shipping</span>
-                      <span className="font-semibold text-ink dark:text-cream">{shipping === 0 ? "Complimentary" : formatCurrency(shipping)}</span>
-                    </div>
-                    {shipping > 0 && (
-                      <p className="text-xs text-gold font-medium">Add {formatCurrency(15000 - subtotal)} more for free delivery</p>
-                    )}
-                  </div>
-
-                  <div className="border-t border-black/5 dark:border-white/10 pt-4" />
-
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-bold text-ink dark:text-cream">Total</span>
-                    <span className="font-serif text-3xl font-bold text-gold">{formatCurrency(total)}</span>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <input
-                      value={coupon}
-                      onChange={(e) => setCoupon(e.target.value)}
-                      placeholder="Promotional code"
-                      className="flex-1 glass-input rounded-full px-4 py-3 text-xs"
-                    />
-                    <button className="glass-pill px-4 rounded-full text-ink dark:text-cream hover:border-gold hover:text-gold transition-all">
-                      <Tag className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <Link
-                    href="/checkout"
-                    className="flex w-full items-center justify-center gap-3 rounded-full bg-gold py-4 text-xs font-bold uppercase tracking-[0.25em] text-white shadow-xl hover:bg-gold-dark transition-all duration-300"
-                  >
-                    Checkout Securely
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-
-                  <div className="flex items-center justify-center gap-2 text-xs text-ink/40 dark:text-cream/40 pt-2 font-medium">
-                    <ShieldCheck className="h-4 w-4 text-gold" />
-                    <span>Silk Mark Certified & Insured Delivery</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
-      </main>
-      <SiteFooter />
-    </>
-  );
+  return <><SiteHeader /><main className="min-h-[80svh] bg-[#f7f4ed] pt-28 text-[#171310] dark:bg-[#171310] dark:text-[#f7f4ed]"><section className="mx-auto max-w-[1480px] px-5 pb-[clamp(6rem,10vw,10rem)] pt-8 md:px-8 xl:px-10">
+    <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#b98a3d]">The final edit</p><div className="mt-4 flex items-end justify-between border-b border-[#281e16]/12 pb-9 dark:border-white/12"><h1 className="font-serif text-[clamp(4rem,8vw,8rem)] font-light leading-none tracking-[-0.045em]">Your bag.</h1><p className="hidden pb-2 text-[10px] uppercase tracking-[0.16em] text-[#716b63] sm:block">{cartItems.length} {cartItems.length === 1 ? "piece" : "pieces"}</p></div>
+    {cartItems.length === 0 ? <div className="py-[clamp(6rem,12vw,11rem)] text-center"><p className="font-serif text-[clamp(3rem,6vw,6rem)] font-light">Nothing chosen yet.</p><p className="mx-auto mt-5 max-w-sm text-sm leading-7 text-[#716b63] dark:text-[#eee9de]/55">Your considered pieces will wait here.</p><Link href="/shop" className="mt-9 inline-flex min-h-12 items-center gap-3 rounded-full bg-[#241b16] px-7 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#f7f4ed]">Discover the collection <ArrowRight className="h-4 w-4" /></Link></div> : <div className="mt-10 grid gap-16 lg:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="divide-y divide-[#281e16]/12 dark:divide-white/12">{cartItems.map((item) => <article key={`${item.productId}-${item.size}-${item.color}`} className="grid grid-cols-[110px_1fr] gap-5 py-6 first:pt-0 sm:grid-cols-[170px_1fr] sm:gap-8"><Link href={`/shop/${item.product!.slug}`} className="relative aspect-[3/4] overflow-hidden rounded-[16px]"><Image src={item.product!.images[0].url} alt={item.product!.title} fill className="object-cover" sizes="170px" /></Link><div className="flex min-w-0 flex-col py-1"><div className="flex items-start justify-between gap-3"><div><p className="text-[8px] font-semibold uppercase tracking-[0.24em] text-[#b98a3d]">{item.product!.category}</p><Link href={`/shop/${item.product!.slug}`} className="mt-2 block font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-light leading-none">{item.product!.title}</Link></div><button onClick={() => removeItem(item.productId)} aria-label={`Remove ${item.product!.title}`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#281e16]/10 text-[#716b63] hover:border-[#b98a3d] hover:text-[#b98a3d] dark:border-white/10"><Trash2 className="h-4 w-4" /></button></div><p className="mt-4 text-[10px] text-[#716b63] dark:text-[#eee9de]/48">{item.color} · {item.size} · Qty {item.quantity}</p><p className="mt-auto pt-5 text-sm font-semibold">{formatCurrency(item.product!.price * item.quantity)}</p></div></article>)}</div>
+      <aside className="lg:sticky lg:top-28 lg:self-start"><h2 className="font-serif text-4xl font-light">Order summary</h2><dl className="mt-7 space-y-4 border-y border-[#281e16]/12 py-6 text-sm dark:border-white/12"><div className="flex justify-between"><dt className="text-[#716b63] dark:text-[#eee9de]/48">Subtotal</dt><dd>{formatCurrency(subtotal)}</dd></div><div className="flex justify-between"><dt className="text-[#716b63] dark:text-[#eee9de]/48">Insured shipping</dt><dd>{shipping === 0 ? "Complimentary" : formatCurrency(shipping)}</dd></div></dl>{shipping > 0 && <p className="mt-4 text-[10px] leading-5 text-[#b98a3d]">Add {formatCurrency(15000 - subtotal)} more for complimentary delivery.</p>}<div className="mt-6 flex items-baseline justify-between"><span className="text-[10px] font-semibold uppercase tracking-[0.16em]">Total</span><span className="font-serif text-3xl">{formatCurrency(total)}</span></div><div className="mt-7 flex border-b border-[#281e16]/20 dark:border-white/20"><input value={coupon} onChange={(event) => setCoupon(event.target.value)} placeholder="Promotional code" className="min-h-12 min-w-0 flex-1 bg-transparent text-sm outline-none" /><button className="min-h-12 text-[9px] font-semibold uppercase tracking-[0.16em]">Apply</button></div><Link href="/checkout" className="mt-7 flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-[#241b16] text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f7f4ed] transition-colors hover:bg-[#b98a3d] dark:bg-[#f7f4ed] dark:text-[#171310]">Continue securely <ArrowRight className="h-4 w-4" /></Link><p className="mt-5 flex items-center justify-center gap-2 text-[9px] text-[#716b63] dark:text-[#eee9de]/38"><ShieldCheck className="h-4 w-4 text-[#b98a3d]" /> Encrypted payment · insured delivery</p></aside>
+    </div>}
+  </section></main><SiteFooter /></>;
 }

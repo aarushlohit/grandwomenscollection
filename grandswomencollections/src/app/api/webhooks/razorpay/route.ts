@@ -1,8 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { logAuditEvent } from "@/lib/audit";
+import { firebaseBackendOnlyResponse } from "@/lib/firebase/backend-route";
 
-export async function POST(request: NextRequest) {
-  const payload = await request.json();
-  await logAuditEvent({ type: "razorpay-webhook", payload });
-  return NextResponse.json({ received: true });
+export async function POST() {
+  return firebaseBackendOnlyResponse();
 }

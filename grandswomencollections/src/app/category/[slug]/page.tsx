@@ -15,7 +15,7 @@ export default function CategorySlugPage({ params }: { params: Promise<{ slug: s
   return (
     <>
       <SiteHeader />
-      <main className="pt-[72px]">
+      <main className="pt-20">
         <section className="relative overflow-hidden bg-ink py-20 dark:bg-[#0a0a0a]">
           <div className="container relative z-10 py-12 text-center">
             <p className="text-[11px] uppercase tracking-[0.4em] text-gold">Category</p>

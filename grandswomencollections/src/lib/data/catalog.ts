@@ -217,7 +217,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 92,
     images: [
-      { url: "https://images.unsplash.com/photo-1583391733981-849764b7f6f1?auto=format&fit=crop&w=1200&q=80", alt: "Azura saree drape" },
+      { url: "/images/saree_editorial_1785319869961.png", alt: "Azura saree drape" },
       { url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80", alt: "Azura blouse and border" }
     ],
     description: "A contemporary saree with couture finishing, designed for long wedding evenings. Hand-applied crystal borders catch the light with every movement.",

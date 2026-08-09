@@ -1,19 +1,39 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.health = exports.nightlyBackupReminder = exports.hourlyBudgetCheck = void 0;
-const scheduler_1 = require("firebase-functions/v2/scheduler");
-const https_1 = require("firebase-functions/v2/https");
-const app_1 = require("firebase-admin/app");
-(0, app_1.initializeApp)();
-exports.hourlyBudgetCheck = (0, scheduler_1.onSchedule)("every 60 minutes", async () => {
-    console.info("Budget check executed");
-});
-exports.nightlyBackupReminder = (0, scheduler_1.onSchedule)("every day 02:00", async () => {
-    console.info("Backup reminder executed");
-});
-exports.health = (0, https_1.onRequest)((_request, response) => {
-    response.json({
-        status: "ok",
-        service: "grand-womens-functions"
-    });
-});
+exports.validateUploadedImage = exports.verifyPayment = exports.razorpayWebhook = exports.createCheckoutOrder = exports.verifyLatestBackup = exports.syncCloudflareSecurityEvents = exports.socIngest = exports.recordClientSecurityEvent = exports.monitorResourceUsage = exports.monitorWebsite = exports.health = exports.getSocDashboard = exports.getOperationsDashboard = exports.expireStaleData = exports.deploymentWebhook = exports.dailyHealthReport = exports.dailyFirestoreBackup = exports.submitVerifiedReview = exports.submitContactRequest = exports.deleteOwnReview = exports.aiVisualSearch = exports.aiShoppingAssistant = exports.adminGenerateProductDescription = exports.adminUpdateOrderStatus = exports.adminSetUserRole = exports.adminRefundOrder = exports.adminMutateCatalog = exports.disableDeletedCustomerProfile = exports.createCustomerProfile = void 0;
+var auth_events_1 = require("./auth-events");
+Object.defineProperty(exports, "createCustomerProfile", { enumerable: true, get: function () { return auth_events_1.createCustomerProfile; } });
+Object.defineProperty(exports, "disableDeletedCustomerProfile", { enumerable: true, get: function () { return auth_events_1.disableDeletedCustomerProfile; } });
+var admin_1 = require("./admin");
+Object.defineProperty(exports, "adminMutateCatalog", { enumerable: true, get: function () { return admin_1.adminMutateCatalog; } });
+Object.defineProperty(exports, "adminRefundOrder", { enumerable: true, get: function () { return admin_1.adminRefundOrder; } });
+Object.defineProperty(exports, "adminSetUserRole", { enumerable: true, get: function () { return admin_1.adminSetUserRole; } });
+Object.defineProperty(exports, "adminUpdateOrderStatus", { enumerable: true, get: function () { return admin_1.adminUpdateOrderStatus; } });
+var ai_1 = require("./ai");
+Object.defineProperty(exports, "adminGenerateProductDescription", { enumerable: true, get: function () { return ai_1.adminGenerateProductDescription; } });
+Object.defineProperty(exports, "aiShoppingAssistant", { enumerable: true, get: function () { return ai_1.aiShoppingAssistant; } });
+Object.defineProperty(exports, "aiVisualSearch", { enumerable: true, get: function () { return ai_1.aiVisualSearch; } });
+var commerce_1 = require("./commerce");
+Object.defineProperty(exports, "deleteOwnReview", { enumerable: true, get: function () { return commerce_1.deleteOwnReview; } });
+Object.defineProperty(exports, "submitContactRequest", { enumerable: true, get: function () { return commerce_1.submitContactRequest; } });
+Object.defineProperty(exports, "submitVerifiedReview", { enumerable: true, get: function () { return commerce_1.submitVerifiedReview; } });
+var monitoring_1 = require("./monitoring");
+Object.defineProperty(exports, "dailyFirestoreBackup", { enumerable: true, get: function () { return monitoring_1.dailyFirestoreBackup; } });
+Object.defineProperty(exports, "dailyHealthReport", { enumerable: true, get: function () { return monitoring_1.dailyHealthReport; } });
+Object.defineProperty(exports, "deploymentWebhook", { enumerable: true, get: function () { return monitoring_1.deploymentWebhook; } });
+Object.defineProperty(exports, "expireStaleData", { enumerable: true, get: function () { return monitoring_1.expireStaleData; } });
+Object.defineProperty(exports, "getOperationsDashboard", { enumerable: true, get: function () { return monitoring_1.getOperationsDashboard; } });
+Object.defineProperty(exports, "getSocDashboard", { enumerable: true, get: function () { return monitoring_1.getSocDashboard; } });
+Object.defineProperty(exports, "health", { enumerable: true, get: function () { return monitoring_1.health; } });
+Object.defineProperty(exports, "monitorWebsite", { enumerable: true, get: function () { return monitoring_1.monitorWebsite; } });
+Object.defineProperty(exports, "monitorResourceUsage", { enumerable: true, get: function () { return monitoring_1.monitorResourceUsage; } });
+Object.defineProperty(exports, "recordClientSecurityEvent", { enumerable: true, get: function () { return monitoring_1.recordClientSecurityEvent; } });
+Object.defineProperty(exports, "socIngest", { enumerable: true, get: function () { return monitoring_1.socIngest; } });
+Object.defineProperty(exports, "syncCloudflareSecurityEvents", { enumerable: true, get: function () { return monitoring_1.syncCloudflareSecurityEvents; } });
+Object.defineProperty(exports, "verifyLatestBackup", { enumerable: true, get: function () { return monitoring_1.verifyLatestBackup; } });
+var payments_1 = require("./payments");
+Object.defineProperty(exports, "createCheckoutOrder", { enumerable: true, get: function () { return payments_1.createCheckoutOrder; } });
+Object.defineProperty(exports, "razorpayWebhook", { enumerable: true, get: function () { return payments_1.razorpayWebhook; } });
+Object.defineProperty(exports, "verifyPayment", { enumerable: true, get: function () { return payments_1.verifyPayment; } });
+var storage_validation_1 = require("./storage-validation");
+Object.defineProperty(exports, "validateUploadedImage", { enumerable: true, get: function () { return storage_validation_1.validateUploadedImage; } });

@@ -1,65 +1,9 @@
-"use client";
-
-import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowDownRight } from "lucide-react";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
 import { collections } from "@/lib/data/catalog";
-import { SectionHeading } from "@/components/site/section-heading";
-import { ArrowUpRight } from "lucide-react";
 
-export default function CollectionsPage() {
-  return (
-    <>
-      <SiteHeader />
-      <main className="pt-[72px]">
-        <section className="relative overflow-hidden bg-ink py-20 dark:bg-[#0a0a0a]">
-          <div className="absolute inset-0 opacity-40">
-            <Image
-              src="/images/collection_jewelry_1785319899305.png"
-              alt="Temple Jewelry Collection"
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </div>
-          <div className="container relative z-10 py-12 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-gold drop-shadow-md">Curated Edits</p>
-            <h1 className="mt-4 font-serif text-5xl md:text-7xl text-white drop-shadow-lg">Collections</h1>
-            <p className="mx-auto mt-4 max-w-md text-[15px] text-white/90 drop-shadow-md">
-              Seasonal narratives and timeless capsules, each telling a unique style story of heritage.
-            </p>
-          </div>
-        </section>
-
-        <section className="container py-16">
-          <div className="space-y-6">
-            {collections.map((collection, i) => (
-              <motion.div
-                key={collection.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-              >
-                <Link
-                  href={`/collections/${collection.slug}`}
-                  className="group flex items-center justify-between rounded-3xl border border-ink/5 bg-cream/50 p-8 transition-all hover:border-gold/30 hover:shadow-sm dark:border-cream/5 dark:bg-cream/5 md:p-12"
-                >
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-gold">{collection.season}</p>
-                    <h2 className="mt-3 font-serif text-headline text-ink dark:text-cream">{collection.title}</h2>
-                    <p className="mt-3 max-w-xl text-[15px] text-ink/50 dark:text-cream/50">{collection.description}</p>
-                  </div>
-                  <ArrowUpRight className="h-6 w-6 flex-shrink-0 text-ink/15 transition-all group-hover:text-gold group-hover:translate-x-1 group-hover:-translate-y-1 dark:text-cream/15" />
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </>
-  );
-}
+const images = ["/images/collection_sarees_1785319884762.png", "/images/collection_jewelry_1785319899305.png", "/images/collection_lehengas_1785319969542.png", "/images/saree_editorial_1785319869961.png"];
+export default function CollectionsPage() { return <><SiteHeader /><main className="bg-[#f7f4ed] pt-28 text-[#171310] dark:bg-[#171310] dark:text-[#f7f4ed]"><section className="mx-auto max-w-[1480px] px-5 pb-[clamp(6rem,10vw,10rem)] pt-10 md:px-8 xl:px-10"><p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-[#b98a3d]">House narratives</p><h1 className="mt-5 max-w-[11ch] font-serif text-[clamp(4.5rem,10vw,10rem)] font-light leading-[0.78] tracking-[-0.05em]">Collections with a point of view.</h1><p className="mt-9 max-w-md text-base leading-7 text-[#716b63] dark:text-[#eee9de]/55">Seasonal stories and permanent signatures, composed as complete wardrobes.</p><div className="mt-[clamp(5rem,10vw,9rem)] space-y-5">{collections.map((collection,index)=><Link key={collection.id} href={`/collections/${collection.slug}`} className="group grid gap-5 border-t border-[#281e16]/12 pt-5 md:grid-cols-[0.7fr_1fr_0.8fr] md:items-center dark:border-white/12"><p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#b98a3d]">0{index+1} · {collection.season}</p><div className="relative aspect-[16/8] overflow-hidden rounded-[20px]"><Image src={images[index%images.length]} alt={collection.title} fill className="object-cover transition-transform duration-[1000ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03]" sizes="50vw" /></div><div className="flex items-end justify-between gap-4 py-4"><div><h2 className="font-serif text-[clamp(2.6rem,5vw,5.5rem)] font-light leading-[0.88] tracking-[-0.04em]">{collection.title}</h2><p className="mt-4 max-w-md text-sm leading-6 text-[#716b63] dark:text-[#eee9de]/48">{collection.description}</p></div><ArrowDownRight className="h-5 w-5 shrink-0 text-[#b98a3d]" /></div></Link>)}</div></section></main><SiteFooter /></>; }

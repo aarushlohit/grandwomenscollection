@@ -8,6 +8,16 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
+.firebase
+functions/lib
+honeypot/lib
+functions/.env.*
+honeypot/.env.*
+!.env.example
+!functions/.env.example
+!honeypot/.env.example
+*.tsbuildinfo
 dist
 dist-ssr
 *.local

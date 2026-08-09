@@ -25,7 +25,7 @@ export function EditorialStory() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative"
           >
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] shadow-2xl">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl shadow-2xl">
               <motion.div style={{ y: imgY, scale: imgScale }} className="absolute inset-0 h-[120%] w-[120%] -top-[10%] -left-[10%]">
                 <Image
                   src="/images/saree_editorial_1785319869961.png"
@@ -35,7 +35,7 @@ export function EditorialStory() {
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </motion.div>
-              <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-[2rem]" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-black/10 dark:ring-white/10 rounded-xl" />
             </div>
             
             <motion.div 
@@ -43,7 +43,7 @@ export function EditorialStory() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="absolute -bottom-8 -right-8 hidden aspect-square w-48 rounded-[2rem] bg-white/60 p-6 shadow-xl backdrop-blur-xl border border-white/40 dark:bg-black/40 dark:border-white/10 md:block"
+              className="absolute -bottom-8 -right-8 hidden aspect-square w-48 rounded-xl bg-white/60 p-6 shadow-xl backdrop-blur-xl border border-white/40 dark:bg-black/40 dark:border-white/10 md:block"
             >
               <p className="font-serif text-5xl text-gold">100+</p>
               <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-ink/70 dark:text-cream/70 font-medium">Years of Zari Heritage</p>
@@ -56,7 +56,7 @@ export function EditorialStory() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-gold">The Kalyani Legacy</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-gold">The Grand Women&apos;s Story</p>
             <h2 className="mt-6 font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.1] text-ink dark:text-cream font-light">
               Where heritage
               <br />

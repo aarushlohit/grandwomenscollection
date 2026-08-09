@@ -10,7 +10,7 @@ export default function ContactPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[72px] bg-cream dark:bg-black min-h-screen transition-colors">
+      <main className="pt-20 bg-cream dark:bg-black min-h-screen transition-colors">
         {/* Liquid Glass Hero */}
         <section className="relative overflow-hidden py-24 md:py-32">
           <div className="absolute inset-0 opacity-20 dark:opacity-15">

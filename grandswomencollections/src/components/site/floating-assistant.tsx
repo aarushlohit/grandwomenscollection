@@ -3,10 +3,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, SendHorizontal, X, MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { backend } from "@/lib/firebase/backend";
 
 export function FloatingAssistant() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([
     { role: "assistant", text: "Hello! I'm your personal fashion stylist. How can I help you today?" }
   ]);
@@ -18,21 +22,30 @@ export function FloatingAssistant() {
     "What's trending this season?"
   ];
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const handleSend = async () => {
+    const prompt = message.trim();
+    if (!prompt || isSending) return;
     setMessages((prev) => [
       ...prev,
-      { role: "user", text: message },
-      {
-        role: "assistant",
-        text: "Thank you for your question! Our AI stylist is being trained and will be available soon. In the meantime, our team of personal shoppers would love to help you find the perfect piece."
-      }
+      { role: "user", text: prompt },
     ]);
     setMessage("");
+    setIsSending(true);
+    try {
+      const result = await backend.aiShoppingAssistant({ prompt });
+      const data = result.data as { answer?: string };
+      setMessages((previous) => [...previous, { role: "assistant", text: data.answer ?? "I could not find a matching piece." }]);
+    } catch {
+      setMessages((previous) => [...previous, { role: "assistant", text: "Please sign in to use the personal stylist, or try again shortly." }]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  if (pathname.startsWith("/admin") || ["/login", "/register", "/forgot-password"].includes(pathname)) return null;
+
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -40,7 +53,7 @@ export function FloatingAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="mb-4 w-[360px] overflow-hidden rounded-3xl border border-ink/5 bg-cream shadow-editorial dark:border-cream/10 dark:bg-[#0e0c0a]"
+            className="mb-3 w-[calc(100vw-2rem)] max-w-[380px] overflow-hidden rounded-2xl border border-ink/10 bg-[#f7f3ec] shadow-editorial dark:border-cream/10 dark:bg-[#0e0c0a]"
           >
             <div className="flex items-center justify-between border-b border-ink/5 px-6 py-4 dark:border-cream/5">
               <div>
@@ -96,13 +109,13 @@ export function FloatingAssistant() {
                 <input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  onKeyDown={(e) => e.key === "Enter" && void handleSend()}
                   placeholder="Ask about styling, sizing..."
                   className="flex-1 rounded-full bg-ink/5 px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/30 focus:bg-ink/8 dark:bg-cream/5 dark:text-cream dark:placeholder:text-cream/30"
                 />
                 <button
-                  onClick={handleSend}
-                  disabled={!message.trim()}
+                  onClick={() => void handleSend()}
+                  disabled={!message.trim() || isSending}
                   className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-white transition-colors hover:bg-gold-dark disabled:opacity-40"
                 >
                   <SendHorizontal className="h-4 w-4" />
@@ -117,7 +130,7 @@ export function FloatingAssistant() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(!open)}
-        className="flex h-14 items-center gap-2 rounded-full bg-ink px-5 shadow-editorial transition-colors hover:bg-gold dark:bg-cream dark:text-ink"
+        className="ml-auto flex h-12 items-center gap-2 rounded-full bg-ink px-4 shadow-editorial transition-colors hover:bg-gold-dark dark:bg-cream dark:text-ink sm:h-14 sm:px-5"
       >
         {open ? (
           <X className="h-5 w-5 text-cream dark:text-ink" />

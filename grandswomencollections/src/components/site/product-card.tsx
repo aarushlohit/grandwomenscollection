@@ -16,26 +16,27 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
     : 0;
 
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.08 }}
     >
       <Link href={`/shop/${product.slug}`} className="group block">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-[2rem] glass-card border border-black/5 dark:border-white/10 shadow-lg">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] bg-[#eee9de] dark:bg-[#241b16]">
           <Image
             src={product.images[0].url}
             alt={product.images[0].alt}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-[transform,opacity] duration-700 ease-luxury group-hover:scale-[1.03] group-hover:opacity-0"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+          {product.images[1] && <Image src={product.images[1].url} alt={product.images[1].alt} fill className="scale-[1.015] object-cover opacity-0 transition-[transform,opacity] duration-700 ease-luxury group-hover:scale-100 group-hover:opacity-100" sizes="(max-width: 768px) 50vw, 25vw" />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
           {discount > 0 && (
-            <span className="absolute left-4 top-4 glass-pill px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold">
-              -{discount}%
+            <span className="absolute left-3 top-3 bg-[#f7f3ec] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-ink shadow-sm">
+              Save {discount}%
             </span>
           )}
 
@@ -45,7 +46,8 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
               e.stopPropagation();
               toggleWishlist(product.id);
             }}
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full glass-pill transition-all duration-300 hover:scale-110"
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-[#f7f3ec]/95 text-ink shadow-sm transition-colors duration-300 hover:bg-ink hover:text-cream"
           >
             <Heart
               className={`h-4 w-4 transition-colors ${
@@ -55,17 +57,17 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           </button>
 
           <div className="absolute bottom-4 left-4 right-4 opacity-0 transition-all duration-500 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-            <span className="w-full justify-center flex items-center rounded-full bg-white/90 dark:bg-black/90 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-ink dark:text-cream backdrop-blur-md shadow-xl">
-              View Product
+            <span className="flex w-full items-center justify-center rounded-full border border-white/30 bg-[#f7f4ed]/85 px-4 py-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#171310] shadow-xl backdrop-blur-xl">
+              Discover piece →
             </span>
           </div>
         </div>
 
-        <div className="mt-4 space-y-1.5 px-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">
+        <div className="mt-4 space-y-1 px-0.5">
+          <p className="text-[8px] font-semibold uppercase tracking-[0.24em] text-[#b98a3d]">
             {product.category}
           </p>
-          <h3 className="font-serif text-xl text-ink transition-colors group-hover:text-gold dark:text-cream font-medium">
+          <h3 className="font-serif text-[clamp(1.2rem,1.8vw,1.55rem)] font-medium leading-tight text-[#171310] transition-colors group-hover:text-[#b98a3d] dark:text-[#f7f4ed]">
             {product.title}
           </h3>
           <p className="text-xs text-ink/50 dark:text-cream/50 line-clamp-1 font-light">
@@ -73,7 +75,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           </p>
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-baseline gap-2">
-              <p className="text-lg font-bold text-ink dark:text-cream">
+              <p className="text-sm font-semibold text-ink dark:text-cream">
                 {formatCurrency(product.price)}
               </p>
               {product.compareAtPrice && (
@@ -91,6 +93,6 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           </div>
         </div>
       </Link>
-    </motion.div>
+    </motion.article>
   );
 }

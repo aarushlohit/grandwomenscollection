@@ -1,23 +1,10 @@
-import { SiteFooter } from "@/components/site/footer";
-import { SiteHeader } from "@/components/site/header";
+import Link from "next/link";
+import { AuthShell } from "@/components/site/auth-shell";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export default function ForgotPasswordPage() {
-  return (
-    <>
-      <SiteHeader />
-      <main className="container py-16">
-        <Card className="mx-auto max-w-xl p-8">
-          <h1 className="font-serif text-4xl text-ink dark:text-cream">Reset password</h1>
-          <div className="mt-6 grid gap-4">
-            <Input placeholder="Email address" type="email" />
-            <Button>Send reset link</Button>
-          </div>
-        </Card>
-      </main>
-      <SiteFooter />
-    </>
-  );
+  return <AuthShell eyebrow="Account recovery" title="Reset access." description="Enter the email used for your Grand account. We’ll send a secure, time-limited reset link." footer={<Link href="/login" className="font-semibold text-ink underline decoration-gold underline-offset-4 dark:text-cream">Return to sign in</Link>}>
+    <div className="grid gap-4"><Input aria-label="Email address" placeholder="Email address" type="email" /><Button className="w-full">Send reset link</Button></div>
+  </AuthShell>;
 }

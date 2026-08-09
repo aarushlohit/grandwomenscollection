@@ -43,7 +43,7 @@ export function LuxuryCategoryGrid() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="lg:col-span-7"
           >
-            <Link href={`/category/${first.slug}`} className="group relative block h-full overflow-hidden rounded-[2rem] shadow-xl">
+            <Link href={`/category/${first.slug}`} className="group relative block h-full overflow-hidden rounded-xl shadow-xl">
               <div className="relative h-full min-h-[500px] overflow-hidden">
                 <Image
                   src={overrideImages[0]}
@@ -53,7 +53,7 @@ export function LuxuryCategoryGrid() {
                   sizes="(max-width: 1024px) 100vw, 60vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2rem]" />
+                <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-xl" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-10">
                 <h3 className="font-serif text-4xl text-white">{overrideTitles[0]}</h3>
@@ -75,7 +75,7 @@ export function LuxuryCategoryGrid() {
                 transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
                 className="h-full"
               >
-                <Link href={`/category/${category.slug}`} className="group relative block h-full overflow-hidden rounded-[2rem] shadow-lg">
+                <Link href={`/category/${category.slug}`} className="group relative block h-full overflow-hidden rounded-xl shadow-lg">
                   <div className="relative h-full min-h-[240px] overflow-hidden">
                     <Image
                       src={overrideImages[i + 1]}
@@ -84,7 +84,7 @@ export function LuxuryCategoryGrid() {
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2rem]" />
+                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-xl" />
                   </div>
                   <div className="absolute bottom-0 left-0 p-8 h-full flex flex-col justify-end w-2/3">
                     <h3 className="font-serif text-2xl text-white leading-tight">{overrideTitles[i + 1]}</h3>

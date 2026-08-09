@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, SendHorizontal } from "lucide-react";
+import { backend } from "@/lib/firebase/backend";
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -18,14 +19,21 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", subject: "", message: "" }
   });
 
   async function onSubmit(values: ContactFormValues) {
-    setSubmitted(true);
-    form.reset();
+    setSubmitError("");
+    try {
+      await backend.submitContactRequest(values);
+      setSubmitted(true);
+      form.reset();
+    } catch {
+      setSubmitError("We could not send your message. Please try again shortly.");
+    }
   }
 
   return (
@@ -49,7 +57,7 @@ export function ContactForm() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onSubmit={form.handleSubmit(onSubmit)}
-          className="glass-card rounded-[2rem] p-8 md:p-10 border border-black/5 dark:border-white/10 space-y-5"
+          className="glass-card rounded-xl p-8 md:p-10 border border-black/5 dark:border-white/10 space-y-5"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
@@ -89,11 +97,13 @@ export function ContactForm() {
           </div>
           <button
             type="submit"
+            disabled={form.formState.isSubmitting}
             className="w-full mt-4 flex items-center justify-center gap-3 rounded-full bg-gold py-4 text-xs font-bold uppercase tracking-[0.25em] text-white shadow-xl hover:bg-gold-dark transition-all duration-300"
           >
             <SendHorizontal className="h-4 w-4" />
-            Send Inquiry
+            {form.formState.isSubmitting ? "Sending…" : "Send Inquiry"}
           </button>
+          {submitError && <p role="alert" className="text-sm text-danger">{submitError}</p>}
         </motion.form>
       )}
     </AnimatePresence>

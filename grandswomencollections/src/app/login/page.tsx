@@ -1,26 +1,10 @@
 import Link from "next/link";
-import { SiteFooter } from "@/components/site/footer";
-import { SiteHeader } from "@/components/site/header";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { AuthShell } from "@/components/site/auth-shell";
+import { AuthForm } from "@/components/site/auth-form";
 
 export default function LoginPage() {
-  return (
-    <>
-      <SiteHeader />
-      <main className="container py-16">
-        <Card className="mx-auto max-w-xl p-8">
-          <h1 className="font-serif text-4xl text-ink dark:text-cream">Login</h1>
-          <div className="mt-6 grid gap-4">
-            <Input placeholder="Email address" type="email" />
-            <Input placeholder="Password" type="password" />
-            <Button>Continue securely</Button>
-            <Link href="/forgot-password" className="text-sm text-ink/60 dark:text-cream/60">Forgot password?</Link>
-          </div>
-        </Card>
-      </main>
-      <SiteFooter />
-    </>
-  );
+  return <AuthShell eyebrow="Private client access" title="Welcome back." description="Sign in to view your orders, saved pieces and personal styling recommendations." footer={<>New to Grand? <Link href="/register" className="font-semibold text-ink underline decoration-gold underline-offset-4 dark:text-cream">Create an account</Link></>}>
+    <AuthForm mode="login" />
+    <div className="mt-5 text-right"><Link href="/forgot-password" className="text-xs text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink dark:text-cream/50 dark:hover:text-cream">Forgot your password?</Link></div>
+  </AuthShell>;
 }

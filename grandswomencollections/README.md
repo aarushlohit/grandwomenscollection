@@ -1,48 +1,26 @@
-# GRAND WOMEN'S COLLECTIONS
+# Grand Women's Collections
 
-Luxury Fashion. Powered by AI. Built Secure.
+Secure boutique commerce built with Next.js, Firebase Authentication, Firestore, Storage, Cloud Functions, Razorpay, provider-fallback AI, and a separate Firebase honeypot codebase.
 
-## Stack
-
-- Next.js App Router + TypeScript + TailwindCSS
-- Firebase Auth, Firestore, Storage, Functions
-- Razorpay test integration
-- OpenCode primary AI provider with NVIDIA fallback
-- Vercel deployment target
-- GitHub Actions CI
-
-## Run
+## Local verification
 
 ```bash
-npm install
-npm run dev
-```
-
-## Validate
-
-```bash
+npm ci
+npm ci --prefix functions
+npm ci --prefix honeypot
 npm run lint
 npm run typecheck
 npm run test
-```
-
-## Firebase
-
-Root includes:
-
-- `firestore.rules`
-- `storage.rules`
-- `firestore.indexes.json`
-- `functions/`
-
-For functions:
-
-```bash
-cd functions
-npm install
+npm run test:firebase
 npm run build
+npm run build --prefix functions
+npm run build --prefix honeypot
 ```
 
-## Environment
+Firebase emulator tests always use `demo-grand-womens`; Firebase rejects any attempt by a demo project to reach live services.
 
-Copy `.env.example` to `.env.local` and set all secrets from environment variables only.
+## Deployment
+
+The frontend deploys to Vercel. Firebase CLI deploys only the `backend` codebase, rules, indexes, and Storage configuration. The honeypot must be deployed to a different Firebase project.
+
+See [Firebase backend operations](docs/FIREBASE_BACKEND.md) and [security model](docs/SECURITY.md) before configuring a staging or production project.

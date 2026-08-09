@@ -42,7 +42,7 @@ export function FeaturedCollections() {
             >
               <Link
                 href={`/collections/${collection.slug}`}
-                className="group relative block overflow-hidden rounded-[2rem] bg-ink/5 dark:bg-cream/5 shadow-2xl"
+                className="group relative block overflow-hidden rounded-xl bg-ink/5 dark:bg-cream/5 shadow-2xl"
               >
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <Image
@@ -54,7 +54,7 @@ export function FeaturedCollections() {
                   />
                   {/* Glassmorphism gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2rem]" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-xl" />
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-8 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">

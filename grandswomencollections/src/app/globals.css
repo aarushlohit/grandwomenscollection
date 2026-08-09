@@ -4,17 +4,28 @@
 
 :root {
   color-scheme: light;
+  --paper: #f7f4ed;
+  --paper-deep: #eee9de;
+  --ink: #171310;
+  --muted-copy: #716b63;
+  --bronze: #b98a3d;
+  --chocolate: #241b16;
+  --line: rgb(40 30 20 / 0.12);
+  --ease-grand: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   @apply bg-cream text-ink antialiased;
-  background-image:
-    radial-gradient(circle at top left, rgba(196, 145, 83, 0.08), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(36, 46, 78, 0.06), transparent 30%);
+  min-width: 320px;
+  overflow-x: clip;
+  background:
+    radial-gradient(80rem 35rem at 8% -10%, rgb(185 138 61 / 0.07), transparent 60%),
+    var(--paper);
 }
 
 html.dark {
@@ -31,9 +42,17 @@ body::after {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.018;
   z-index: 50;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+.hero-copy {
+  text-shadow: 0 2px 24px rgb(21 15 10 / 0.52);
+}
+
+.hero-copy a {
+  text-shadow: none;
 }
 
 a {
@@ -76,18 +95,87 @@ a {
   }
 
   .glass-card {
-    @apply bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    @apply border border-black/10 bg-[#f8f5ef] dark:border-white/10 dark:bg-[#12110f];
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.75), 0 20px 55px rgb(54 38 22 / 0.07);
   }
 
   .glass-card-hover {
-    @apply glass-card transition-all duration-500 hover:scale-[1.02] hover:bg-white/90 dark:hover:bg-white/10 hover:shadow-[0_20px_40px_0_rgba(196,145,83,0.15)];
+    @apply glass-card transition-[transform,border-color,box-shadow] duration-500 hover:-translate-y-1 hover:border-gold;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.75), 0 20px 55px rgb(54 38 22 / 0.07);
   }
 
   .glass-pill {
-    @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-black/5 dark:border-white/15 text-ink dark:text-cream shadow-sm;
+    @apply border border-black/10 bg-[#f8f5ef] text-ink dark:border-white/15 dark:bg-[#171512] dark:text-cream;
   }
 
   .glass-input {
-    @apply bg-white/50 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 text-ink dark:text-cream focus:border-gold focus:bg-white/80 dark:focus:bg-white/10 outline-none transition-all;
+    @apply border border-black/15 bg-transparent text-ink outline-none transition-[border-color,box-shadow,background-color] dark:border-white/15 dark:text-cream;
+    min-height: 48px;
+  }
+
+  .glass-input:focus {
+    @apply border-gold bg-white/40 dark:bg-white/5;
+    box-shadow: 0 0 0 3px oklch(69.2% 0.12 72.8 / 0.12);
+  }
+
+  .editorial-kicker {
+    @apply text-[10px] font-semibold uppercase tracking-[0.34em] text-gold-dark dark:text-gold;
+  }
+
+  .editorial-rule {
+    border-color: var(--line);
+  }
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  nav a {
+    min-height: 44px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .editorial-section img {
+    transition: transform 900ms var(--ease-grand);
+  }
+}
+
+@media (max-width: 767px) {
+  body::after {
+    display: none;
+  }
+}
+
+.admin-shell .text-black,
+.admin-shell .text-ink {
+  color: oklch(20% 0.01 50);
+}
+
+.admin-shell [class*="dark:text-cream"] {
+  color: oklch(28% 0.012 50) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

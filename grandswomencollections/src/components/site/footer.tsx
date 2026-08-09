@@ -1,77 +1,21 @@
 import Link from "next/link";
-import { Instagram, Twitter, Facebook, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-const footerLinks = {
-  Shop: [
-    { href: "/shop", label: "Kanchipuram Silks" },
-    { href: "/collections", label: "Curated Edits" },
-    { href: "/categories", label: "Browse Categories" },
-    { href: "/shop?new=true", label: "Festive Arrivals" }
-  ],
-  Services: [
-    { href: "/contact", label: "Bridal Concierge" },
-    { href: "/shipping", label: "Pan-India Shipping" },
-    { href: "/returns", label: "Quality Guarantee" },
-    { href: "/faq", label: "FAQ & Sizing" }
-  ],
-  Company: [
-    { href: "/about", label: "Our Legacy" },
-    { href: "/privacy", label: "Privacy Policy" },
-    { href: "/terms", label: "Terms of Service" }
-  ]
-};
+const groups = [
+  { title: "Shop", links: [["/collections", "Collections"], ["/category/sarees", "Sarees"], ["/category/wedding", "Lehengas"], ["/category/jewelry", "Jewellery"]] },
+  { title: "About", links: [["/about", "Our Story"], ["/about#craft", "Craftsmanship"], ["/collections", "Journal"]] },
+  { title: "Help", links: [["/contact", "Contact"], ["/shipping", "Shipping"], ["/returns", "Returns"], ["/faq", "FAQ"]] },
+  { title: "Social", links: [["#", "Instagram"], ["#", "Pinterest"]] }
+] as const;
 
 export function SiteFooter() {
-  return (
-    <footer className="border-t border-black/5 dark:border-white/10 bg-white/60 dark:bg-black/80 backdrop-blur-2xl text-ink dark:text-cream transition-colors">
-      <div className="container py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-          <div>
-            <Link href="/" className="inline-block">
-              <span className="font-serif text-3xl font-bold tracking-[0.25em] text-ink dark:text-cream">GRAND</span>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.4em] text-gold">South Indian Luxury Boutique</p>
-            </Link>
-            <p className="mt-6 max-w-xs text-sm leading-relaxed font-light text-ink/70 dark:text-cream/70">
-              Curating heritage Kanchipuram silks, bridal lehengas, and temple jewelry for auspicious moments. Every drape carries the soul of South Indian weaving.
-            </p>
-            <div className="mt-8 flex gap-3">
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full glass-pill text-ink/70 dark:text-cream/70 transition-all hover:border-gold hover:text-gold hover:scale-110">
-                <Instagram className="h-4 w-4" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full glass-pill text-ink/70 dark:text-cream/70 transition-all hover:border-gold hover:text-gold hover:scale-110">
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full glass-pill text-ink/70 dark:text-cream/70 transition-all hover:border-gold hover:text-gold hover:scale-110">
-                <Facebook className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-
-          {Object.entries(footerLinks).map(([section, links]) => (
-            <div key={section}>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold">{section}</p>
-              <ul className="mt-5 space-y-3">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-xs font-medium text-ink/70 dark:text-cream/70 transition-colors hover:text-gold">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-black/5 dark:border-white/10 pt-8 md:flex-row">
-          <p className="text-xs text-ink/40 dark:text-cream/40">
-            &copy; {new Date().getFullYear()} GRAND Women&apos;s Collections. Silk Mark Certified. All rights reserved.
-          </p>
-          <p className="text-xs text-ink/40 dark:text-cream/40 font-medium">
-            Handcrafted luxury for auspicious moments.
-          </p>
-        </div>
+  return <footer className="bg-[#241b16] text-[#f7f4ed]">
+    <div className="mx-auto max-w-[1480px] px-5 pb-8 pt-[clamp(5rem,10vw,9rem)] md:px-8 xl:px-10">
+      <div className="grid gap-16 lg:grid-cols-[1.15fr_1.85fr]">
+        <div><Link href="/" className="inline-flex min-h-12 items-center font-serif text-[clamp(3.5rem,7vw,7.5rem)] font-light leading-none tracking-[0.16em]">GRAND</Link><p className="mt-6 max-w-sm text-sm leading-7 text-[#eee9de]/52">South Indian craft, curated with a modern eye. Pieces for celebration, memory and legacy.</p><p className="mt-8 text-[9px] font-semibold uppercase tracking-[0.28em] text-[#dec89f]">Coimbatore · Tamil Nadu · India</p></div>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4">{groups.map((group) => <div key={group.title}><h3 className="text-[9px] font-semibold uppercase tracking-[0.26em] text-[#dec89f]">{group.title}</h3><ul className="mt-6 space-y-1">{group.links.map(([href, label]) => <li key={label}><Link href={href} className="group flex min-h-10 items-center gap-1.5 text-sm text-[#eee9de]/58 transition-colors duration-150 hover:text-[#f7f4ed]">{label}{group.title === "Social" && <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-70" />}</Link></li>)}</ul></div>)}</div>
       </div>
-    </footer>
-  );
+      <div className="mt-[clamp(5rem,10vw,9rem)] flex flex-col gap-5 border-t border-white/10 pt-7 text-[9px] font-medium uppercase tracking-[0.16em] text-[#eee9de]/34 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} Grand Women&apos;s Collections</p><div className="flex gap-6"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></div>
+    </div>
+  </footer>;
 }

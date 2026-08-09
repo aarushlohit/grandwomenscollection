@@ -9,7 +9,7 @@ export default function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main className="flex min-h-screen items-center justify-center pt-[72px]">
+      <main className="flex min-h-screen items-center justify-center pt-20">
         <div className="container py-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

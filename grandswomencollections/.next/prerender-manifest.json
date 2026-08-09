@@ -1,1 +1,11 @@
-{"version":4,"routes":{"/shop/velora-satin-gown":{},"/shop/azura-handworked-saree":{},"/shop/ivelle-tailored-coord":{},"/shop/ember-lehenga":{},"/shop/luna-silk-dress":{},"/shop/seraphina-gown":{},"/shop/zara-saree-gown":{},"/shop/naomi-blazer-dress":{},"/shop/elara-jumpsuit":{},"/shop/aria-choli-set":{},"/shop/vivienne-coat":{},"/shop/sonam-anarkali":{},"/shop/celeste-evening-dress":{},"/shop/isha-silk-organza-saree":{},"/shop/maya-structured-bag":{},"/shop/nila-pearl-necklace":{},"/shop/avani-scarf":{},"/shop/kiran-bridal-set":{},"/shop/trisha-wide-leg-pants":{},"/shop/deepa-lehenga-set":{},"/shop/gauri-clutch":{},"/shop/meera-earrings":{},"/shop/rhea-blouse":{}},"dynamicRoutes":{"/shop/[slug]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/shop/[slug]","routeRegex":"^\\/shop\\/([^/]+?)(?:\\/)?$","allowHeader":[]}},"notFoundRoutes":[],"preview":{"previewModeId":"edd2ff530636fdf14ffc1ad8c265ffe5","previewModeSigningKey":"03c545fe25310715d645c0703676186d4b50ec7d757886e889d33d75ab506cd7","previewModeEncryptionKey":"fe6e347a6d385d0575895044bb3767abb3f40c93d17f3cce8a274e83646fb690"}}
+{
+  "version": 4,
+  "routes": {},
+  "dynamicRoutes": {},
+  "notFoundRoutes": [],
+  "preview": {
+    "previewModeId": "5dcc56b97aa0e6c0e739fb41097ec840",
+    "previewModeSigningKey": "eb05cbb1cb894b40a97c3934686af4f56f890bff840a0bdc5ab228497c9949f0",
+    "previewModeEncryptionKey": "993fe793bcfbf8139fb7a467c54232dc0055170e687c6d514ba822ef67af9399"
+  }
+}

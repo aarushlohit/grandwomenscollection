@@ -7,7 +7,7 @@ export default function ReturnsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[72px]">
+      <main className="pt-20">
         <section className="container py-16">
           <h1 className="font-serif text-editorial text-ink dark:text-cream">Returns &amp; Exchanges</h1>
           <div className="prose mt-10 max-w-3xl space-y-8 text-[15px] leading-8 text-ink/60 dark:text-cream/60">

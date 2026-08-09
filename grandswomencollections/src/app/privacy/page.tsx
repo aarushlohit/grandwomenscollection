@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[72px]">
+      <main className="pt-20">
         <section className="container py-16">
           <h1 className="font-serif text-editorial text-ink dark:text-cream">Privacy Policy</h1>
           <p className="mt-2 text-sm text-ink/40 dark:text-cream/40">Last updated: July 2026</p>

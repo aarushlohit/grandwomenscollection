@@ -24,7 +24,7 @@ export function Newsletter() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative overflow-hidden rounded-[2rem] bg-ink p-12 text-center md:p-20 dark:bg-[#0a0a0a]"
+          className="relative overflow-hidden rounded-xl bg-ink p-12 text-center md:p-20 dark:bg-[#0a0a0a]"
         >
           <div className="absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-gold/10 blur-3xl" />
 

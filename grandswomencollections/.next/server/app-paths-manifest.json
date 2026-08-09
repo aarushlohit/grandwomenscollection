@@ -1,8 +1,10 @@
 {
-  "/categories/page": "app/categories/page.js",
-  "/about/page": "app/about/page.js",
-  "/shop/[slug]/page": "app/shop/[slug]/page.js",
+  "/page": "app/page.js",
   "/shop/page": "app/shop/page.js",
+  "/collections/page": "app/collections/page.js",
+  "/about/page": "app/about/page.js",
+  "/category/[slug]/page": "app/category/[slug]/page.js",
+  "/profile/page": "app/profile/page.js",
   "/cart/page": "app/cart/page.js",
-  "/checkout/page": "app/checkout/page.js"
+  "/wishlist/page": "app/wishlist/page.js"
 }

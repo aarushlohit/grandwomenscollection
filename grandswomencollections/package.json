@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:firebase": "firebase emulators:exec --only firestore,storage --project demo-grand-womens \"vitest run --config vitest.firebase.config.ts\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -23,15 +24,10 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "firebase": "^11.10.0",
-    "firebase-admin": "^13.10.0",
     "framer-motion": "^12.23.12",
-    "gsap": "^3.12.5",
-    "helmet": "^8.0.0",
     "lucide-react": "^0.453.0",
-    "next": "^15.0.0",
-    "nodemailer": "^9.0.3",
+    "next": "15.5.23",
     "puppeteer": "^24.43.1",
-    "razorpay": "^2.9.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.53.0",
@@ -42,12 +38,12 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
     "@playwright/test": "^1.49.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.10.1",
-    "@types/nodemailer": "^6.4.16",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
@@ -55,13 +51,14 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.0.0",
     "jsdom": "^25.0.1",
-    "postcss": "^8.5.10",
+    "postcss": "8.5.26",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.7.2",
     "vitest": "^2.1.5"
   },
   "overrides": {
-    "postcss": "^8.5.10",
-    "uuid": "^11.1.1"
+    "postcss": "8.5.26",
+    "sharp": "0.35.3",
+    "uuid": "11.1.1"
   }
 }

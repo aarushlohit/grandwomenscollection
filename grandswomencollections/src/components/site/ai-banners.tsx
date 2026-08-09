@@ -62,7 +62,7 @@ export function AIFashionStylistBanner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="glass-card rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden border border-black/10 dark:border-white/15"
+          className="glass-card rounded-2xl p-8 md:p-14 relative overflow-hidden border border-black/10 dark:border-white/15"
         >
           <div className="grid gap-12 lg:grid-cols-12 items-center">
             {/* Left Controls */}
@@ -119,7 +119,7 @@ export function AIFashionStylistBanner() {
 
             {/* Right Interactive Preview Display */}
             <div className="lg:col-span-6">
-              <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden glass-card shadow-2xl group border border-white/20">
+              <div className="relative aspect-[4/5] rounded-xl overflow-hidden glass-card shadow-2xl group border border-white/20">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeOccasion + activeSilk}
@@ -176,7 +176,7 @@ export function AIVisualSearchBanner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="glass-card rounded-[2.5rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl"
+          className="glass-card rounded-2xl overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl"
         >
           <div className="grid gap-0 lg:grid-cols-2">
             <div className="p-10 md:p-16 relative z-10 flex flex-col justify-center">
